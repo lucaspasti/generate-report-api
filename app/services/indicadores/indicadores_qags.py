@@ -1,0 +1,51 @@
+indicadores_qags = [
+    {
+        "Programa": "Programa de Monitoramento da Qualidade da Água Subterrânea",
+        "Categoria": "ICA",
+        "Indicador": "Concentração de metais pesados",
+        "Unidade": "μg/L",
+        "Meta": "Adequar em 100% os resultados dos parâmetros de qualidade da água subterrânea de acordo com os VMP dispostos na CONAMA 396/2008 por campanha",
+    },
+    {
+        "Programa": "Programa de Monitoramento da Qualidade da Água Subterrânea",
+        "Categoria": "ICA",
+        "Indicador": "Concentração de metais pesados",
+        "Unidade": "μg/L",
+        "Meta": "Adequar em 100% os resultados dos parâmetros de qualidade da água subterrânea de acordo com os VMP dispostos na CONAMA 396/2008 por campanha",
+    },
+    {
+        "Programa": "Programa de Monitoramento da Qualidade da Água Subterrânea",
+        "Categoria": "ICA",
+        "Indicador": "Concentração de coliformes termotolerantes",
+        "Unidade": "UFC/100ml",
+        "Meta": "Adequar em 100% os resultados dos parâmetros de qualidade da água subterrânea de acordo com os VMP dispostos na CONAMA 396/2008 por campanha",
+    },
+    {
+        "Programa": "Programa de Monitoramento da Qualidade da Água Subterrânea",
+        "Categoria": "IDO",
+        "Indicador": "Número de ocorrências de acidentes nas áreas de armazenamento de granéis líquidos",
+        "Unidade": "-",
+        "Meta": "Reduzir número de ocorrências à zero.",
+    },
+    {
+        "Programa": "Programa de Monitoramento da Qualidade da Água Subterrânea",
+        "Categoria": "IDG",
+        "Indicador": "Realização de campanhas de coleta",
+        "Unidade": "%",
+        "Meta": "Realização de 100% das campanhas de monitoramento de coleta previstas",
+    },
+    {
+        "Programa": "Programa de Monitoramento da Qualidade da Água Subterrânea",
+        "Categoria": "IDG",
+        "Indicador": "Realização de coleta e análise dos pontos amostrais",
+        "Unidade": "%",
+        "Meta": "Realização de coleta e análise em 100% dos pontos amostrais nas campanhas previstas",
+    },
+    {
+        "Programa": "Programa de Monitoramento da Qualidade da Água Subterrânea",
+        "Categoria": "IDG",
+        "Indicador": "Elaboração de relatórios parciais por monitoramento",
+        "Unidade": "%",
+        "Meta": "Realização de 100% dos relatórios parciais por monitoramento",
+    },
+]
