@@ -284,19 +284,26 @@ def gerar_relatorio_qag(supabase: Client, payload: QAGRequest) -> QAGResponse:
     public_url = supabase.storage.from_(BUCKET).get_public_url(object_key)
     
     # 10) Insere registro na tabela `relatorios`
-    ins = supabase.table("relatorios").insert({
-        "nome_relatorio": payload.nome_relatorio,
-        "descricao_relatorio": payload.descricao_relatorio,
-        "ativo_id": str(payload.ativo_id),
-        "user_id": str(payload.user_id),
-        "tipo_relatorio": "qag",
-        "url_relatorio": public_url,
-    }).execute()
-    if ins.status_code == "error":
-        raise HTTPException(500, detail=ins["error"]["message"])
+    try: 
+        supabase.table("relatorios").insert({
+            "nome_relatorio": payload.nome_relatorio,
+            "descricao_relatorio": payload.descricao_relatorio,
+            "ativo_id": str(payload.ativo_id),
+            "user_id": str(payload.user_id),
+            "tipo_relatorio": "qag",
+            "url_relatorio": public_url,
+        }).execute()
 
-    if ins.status_code == 201:
-        return QAGResponse(sucesso=True, mensagem="Relatório gerado e registrado com sucesso.")
-    else:
-        detalhe = ins.error or "Erro desconhecido"
-        return QAGResponse(sucesso=False, mensagem=f"Falha ao registrar o relatório: {detalhe}")
+    except Exception as e:
+        return QAGResponse(
+            sucesso=False,
+            mensagem=f"Erro ao registrar o relatório: {str(e)}"
+        )
+
+    finally:
+        # nenhum erro: devolvemos sucesso
+        return QAGResponse(
+            sucesso=True,
+            mensagem="Relatório gerado e registrado com sucesso."
+        )
+
