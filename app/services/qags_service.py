@@ -88,11 +88,13 @@ TEMPLATE_PATH = os.path.join(
 )
 BUCKET = "relatorios-qags"
 
+
 def gerar_relatorio_qags(supabase: Client, payload: QAGRequest) -> QAGResponse:
     """
     Gera, faz upload e registra no banco um relatório QAG.
     """
     # 1) Datas e chaves
+    periodicidade = payload.periodicidade
     data_str = payload.data_campanha.isoformat()
     tz_br = timezone("America/Sao_Paulo")
     now_br = datetime.now(tz_br)
@@ -106,7 +108,8 @@ def gerar_relatorio_qags(supabase: Client, payload: QAGRequest) -> QAGResponse:
 
     # 3) Consultas no Supabase
     ativo = (
-        supabase.table("ativos").select("*").eq("id", str(payload.ativo_id)).execute()
+        supabase.table("ativos").select(
+            "*").eq("id", str(payload.ativo_id)).execute()
     )
     if not ativo.data:
         raise HTTPException(404, detail="Ativo não encontrado")
@@ -119,7 +122,8 @@ def gerar_relatorio_qags(supabase: Client, payload: QAGRequest) -> QAGResponse:
         .execute()
     )
     if not configuracoes.data:
-        raise HTTPException(404, detail="Configuração do formulário não encontrada")
+        raise HTTPException(
+            404, detail="Configuração do formulário não encontrada")
 
     form_qags = (
         supabase.table("form_qualidade_da_agua_subterranea")
@@ -158,7 +162,8 @@ def gerar_relatorio_qags(supabase: Client, payload: QAGRequest) -> QAGResponse:
 
     # reusar o mesmo buffer
     buf = io.BytesIO(resp.content)
-    q_22 = InlineImage(document, buf, width=Cm(5))  # ajuste a largura que quiser
+    # ajuste a largura que quiser
+    q_22 = InlineImage(document, buf, width=Cm(5))
 
     url = form_qags.data[0]["registros_fotograficos_amostradores"][0]
 
@@ -167,7 +172,8 @@ def gerar_relatorio_qags(supabase: Client, payload: QAGRequest) -> QAGResponse:
     resp.raise_for_status()  # levanta exceção se status != 200
 
     # reusar o mesmo buffer
-    q_23 = InlineImage(document, buf, width=Cm(5))  # ajuste a largura que quiser
+    # ajuste a largura que quiser
+    q_23 = InlineImage(document, buf, width=Cm(5))
 
     url = form_qags.data[0]["registros_fotograficos_caixas_termicas"][0]
 
@@ -176,9 +182,11 @@ def gerar_relatorio_qags(supabase: Client, payload: QAGRequest) -> QAGResponse:
     resp.raise_for_status()  # levanta exceção se status != 200
 
     # reusar o mesmo buffer
-    q_24 = InlineImage(document, buf, width=Cm(5))  # ajuste a largura que quiser
+    # ajuste a largura que quiser
+    q_24 = InlineImage(document, buf, width=Cm(5))
 
-    q_25 = configuracoes.data[0]["dados_laboratoriais"][0].get("metodologia_adotada")
+    q_25 = configuracoes.data[0]["dados_laboratoriais"][0].get(
+        "metodologia_adotada")
 
     q_26 = indicadores_qags
 
@@ -577,8 +585,9 @@ def gerar_relatorio_qags(supabase: Client, payload: QAGRequest) -> QAGResponse:
         #         "QAG_41": '',
         #         "QAG_42": '',
         "QAG_43": q_43,
+        "QAG_54": periodicidade  # PERIODICADADE SELECIONADA / AO GERAR O RELATÓRIO
+
     }
-    #          "QAG_54": "PLACEHOLDER"}#PERIODICADADE SELECIONADA / AO GERAR O RELATÓRIO
 
     document.render(contexto)
     document.save(local_path)
