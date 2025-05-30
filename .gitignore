@@ -22,4 +22,6 @@ dist/
 
 
 
+git fetch origin
+git checkout -b lucas origin/lucas
 

@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from app.config import settings
 from app.routers import qag
 from app.routers import qsd
+from app.routers import qags
 
 app = FastAPI(
     title="API EC-Infra",
@@ -24,6 +25,7 @@ app.add_middleware(
 app.include_router(qag.router, prefix="/reports/qag", tags=["QAG"])
 app.include_router(qsd.router, prefix="/reports/qsd", tags=["QSD"])
 #app.include_router(qar.router, prefix="/reports/qar", tags=["QAR"])
+app.include_router(qags.router, prefix="/reports/qags", tags=["QAGS"])
 
 
 @app.get("/", tags=["Health"])
