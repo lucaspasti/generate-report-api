@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware # type: ignore
 
 from app.config import settings
 from app.routers import qag
+from app.routers import qsd
 
 app = FastAPI(
     title="API EC-Infra",
@@ -21,7 +22,7 @@ app.add_middleware(
 
 # Routers
 app.include_router(qag.router, prefix="/reports/qag", tags=["QAG"])
-#app.include_router(qsd.router, prefix="/reports/qsd", tags=["QSD"])
+app.include_router(qsd.router, prefix="/reports/qsd", tags=["QSD"])
 #app.include_router(qar.router, prefix="/reports/qar", tags=["QAR"])
 
 
