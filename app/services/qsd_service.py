@@ -35,6 +35,7 @@ def gerar_relatorio_qsd(supabase: Client, payload: QSDRequest) -> QSDResponse:
     Gera, faz upload e registra no banco um relatório QSD.
     """
     # 1) Datas e chaves
+    periodicidade = payload.periodicidade
     data_str = payload.data_campanha.isoformat()
     tz_br = timezone("America/Sao_Paulo")
     now_br = datetime.now(tz_br)
@@ -543,8 +544,7 @@ def gerar_relatorio_qsd(supabase: Client, payload: QSDRequest) -> QSDResponse:
         "QSD_49": "",  # Variável aberta, para inclusão de texto pelo responsável técnico do relatório
         "QSD_50": q_50,
         "QSD_51": imagens_qsd51,
-        "QSD_54": "PLACEHOLDER",
-        "QAG_54": "PLACEHOLDER",
+        "QSD_54": periodicidade,
     }  # PERIODICADADE SELECIONADA / AO GERAR O RELATÓRIO
 
     document.render(contexto)
