@@ -111,14 +111,7 @@ def gerar_relatorio_qags(supabase: Client, payload: QAGRequest) -> QAGResponse:
     document = DocxTemplate(TEMPLATE_PATH)
 
     # 3) Consultas no Supabase
-    ativo = (
-
-        supabase.table("ativos").select(
-            "*").eq("id", str(payload.ativo_id)).execute()
-
-        supabase.table("ativos").select("*").eq("id", str(payload.ativo_id)).execute()
-
-    )
+    ativo = supabase.table("ativos").select("*").eq("id", str(payload.ativo_id)).execute()
     if not ativo.data:
         raise HTTPException(404, detail="Ativo não encontrado")
 
@@ -615,10 +608,6 @@ def gerar_relatorio_qags(supabase: Client, payload: QAGRequest) -> QAGResponse:
         "QAG_54": periodicidade  # PERIODICADADE SELECIONADA / AO GERAR O RELATÓRIO
 
     }
-
-    }
-    #          "QAG_54": "PLACEHOLDER"}#PERIODICADADE SELECIONADA / AO GERAR O RELATÓRIO
-
 
     document.render(contexto)
     document.save(local_path)
