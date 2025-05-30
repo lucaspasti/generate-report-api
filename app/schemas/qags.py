@@ -10,7 +10,9 @@ class QAGSRequest(BaseModel):
     user_id: UUID
     nome_relatorio: str = Field("Relatório de Qualidade da Água Subterrânea")
     descricao_relatorio: str
+
     periodicidade: str
+
 
 
 class QAGSResponse(BaseModel):
