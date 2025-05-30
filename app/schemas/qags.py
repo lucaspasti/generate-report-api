@@ -11,6 +11,9 @@ class QAGSRequest(BaseModel):
     nome_relatorio: str = Field("Relatório de Qualidade da Água Subterrânea")
     descricao_relatorio: str
 
+    periodicidade: str
+
+
 
 class QAGSResponse(BaseModel):
     mensagem: str

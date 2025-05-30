@@ -193,6 +193,7 @@ def gerar_relatorio_qag(supabase: Client, payload: QAGRequest) -> QAGResponse:
     Gera, faz upload e registra no banco um relatório QAG.
     """
     # 1) Datas e chaves
+    periodicidade = payload.periodicidade
     data_str = payload.data_campanha.isoformat()
     tz_br = timezone("America/Sao_Paulo")
     now_br = datetime.now(tz_br)
@@ -883,8 +884,9 @@ def gerar_relatorio_qag(supabase: Client, payload: QAGRequest) -> QAGResponse:
         "QAG_47": tabela_qag47,
         "QAG_48": solventes,
         "QAG_49": imagens_qag_49,
+        "QAG_54": periodicidade#PERIODICADADE SELECIONADA / AO GERAR O RELATÓRIO
+        
     }
-    #          "QAG_54": "PLACEHOLDER"}#PERIODICADADE SELECIONADA / AO GERAR O RELATÓRIO
 
     document.render(contexto)
     document.save(local_path)
