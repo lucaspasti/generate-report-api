@@ -17,7 +17,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["https://ec-infra-v2.vercel.app/"],
+    allow_headers=["*"],
     allow_credentials=True,
 )
 
