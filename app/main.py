@@ -1,5 +1,5 @@
-from fastapi import FastAPI # type: ignore
-from fastapi.middleware.cors import CORSMiddleware # type: ignore
+from fastapi import FastAPI  # type: ignore
+from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 
 from app.config import settings
 from app.routers import qag
@@ -17,14 +17,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    allow_headers=["https://ec-infra-v2.vercel.app/"],
     allow_credentials=True,
 )
 
 # Routers
 app.include_router(qag.router, prefix="/reports/qag", tags=["QAG"])
 app.include_router(qsd.router, prefix="/reports/qsd", tags=["QSD"])
-#app.include_router(qar.router, prefix="/reports/qar", tags=["QAR"])
+# app.include_router(qar.router, prefix="/reports/qar", tags=["QAR"])
 app.include_router(qags.router, prefix="/reports/qags", tags=["QAGS"])
 
 
