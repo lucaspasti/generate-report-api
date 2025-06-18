@@ -2,13 +2,13 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.qag import QAGRequest, QAGResponse
-from app.services.qag_servicev2 import QAGService 
+from app.services.qag_servicev2 import QAGService
 from app.dependencies import get_supabase
 
 router = APIRouter()
 
 
-@router.post("/", response_model=QAGResponse)
+@router.post("", response_model=QAGResponse)
 def criar_qag(
     payload: QAGRequest,
     supabase=Depends(get_supabase),
