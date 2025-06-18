@@ -26,14 +26,6 @@ app.include_router(qag.router, prefix="/reports/qag", tags=["QAG"])
 app.include_router(qsd.router, prefix="/reports/qsd", tags=["QSD"])
 app.include_router(qags.router, prefix="/reports/qags", tags=["QAGS"])
 
-# Serve arquivos estáticos (como favicon.ico)
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-@app.get("/favicon.ico", include_in_schema=False)
-async def favicon():
-    return FileResponse("static/favicon.ico")
-
 
 @app.get("/", tags=["Health"])
 def health_check():
