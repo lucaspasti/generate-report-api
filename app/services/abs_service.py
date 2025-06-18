@@ -243,12 +243,12 @@ class AbstractService(ABC):
         for i, param in enumerate(parametros):
             row_cells = table.rows[2 + i].cells
             row_cells[0].text = param
-            série = pd.to_numeric(df_copy[param], errors="coerce")
+            serie = pd.to_numeric(df_copy[param], errors="coerce")
             médias = [
-                série.mean(),
-                série[df_copy[profundidade_col] == categorias[1]].mean(),
-                série[df_copy[profundidade_col] == categorias[2]].mean(),
-                série[df_copy[profundidade_col] == categorias[3]].mean(),
+                serie.mean(),
+                serie[df_copy[profundidade_col] == categorias[1]].mean(),
+                serie[df_copy[profundidade_col] == categorias[2]].mean(),
+                serie[df_copy[profundidade_col] == categorias[3]].mean(),
             ]
             for col_idx, val in enumerate(médias, start=1):
                 row_cells[col_idx].text = "" if pd.isna(val) else f"{val:.2f}"

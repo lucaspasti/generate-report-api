@@ -1,10 +1,9 @@
-import matplotlib.pyplot as plt # type: ignore
-import numpy as np # type: ignore
-import pandas as pd # type: ignore
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 
 def gera_distribuicao_granulometrica_qsd(dados):
-
     categorias = [
         "Areia muito grossa (%)",
         "Areia grossa (%)",
@@ -25,7 +24,6 @@ def gera_distribuicao_granulometrica_qsd(dados):
     ]
 
     x = np.arange(dados.shape[0])
-
     fig, ax = plt.subplots(figsize=(8, 6), dpi=120)
     bottom = np.zeros(dados.shape[0])
 
@@ -47,7 +45,10 @@ def gera_distribuicao_granulometrica_qsd(dados):
     ax.set_xlabel("Amostras", fontsize=12)
     ax.set_ylim(0, 100)
     ax.set_title(
-        "Distribuição Granulométrica por Amostra", fontsize=14, weight="bold", pad=15
+        "Distribuição Granulométrica por Amostra",
+        fontsize=14,
+        weight="bold",
+        pad=15
     )
     ax.legend(loc="upper left", bbox_to_anchor=(1, 1), fontsize=10, frameon=True)
     ax.grid(axis="y", linestyle=":", alpha=0.5)
@@ -55,9 +56,6 @@ def gera_distribuicao_granulometrica_qsd(dados):
     ax.spines["right"].set_visible(False)
     plt.tight_layout()
     return fig
-
-
-import matplotlib.pyplot as plt # type: ignore
 
 
 def graficos_linha_com_vmp_por_classe_qsd(
@@ -86,7 +84,7 @@ def graficos_linha_com_vmp_por_classe_qsd(
         )
 
         # Linhas VMP por classe
-        for i, row in dados.iterrows():
+        for _, row in dados.iterrows():
             classe = row[classe_col]
             vmp = vmp_dict.get(classe, {}).get(col, None)
             if vmp is not None:
@@ -120,84 +118,63 @@ def graficos_linha_com_vmp_por_classe_qsd(
     return figuras
 
 
-def grafico_qualidade_agua(df, parametro, classe, vmp_qag):
-    figs = []
-    for parametro in parametro:
+def grafico_qualidade_agua(df, parametros, classe, vmp_qag):
+    """
+    Gera gráficos de qualidade de água para cada parâmetro em `parametros`, na classe `classe`.
+    """
+    # 1) Garante que não trabalhamos sobre uma view
+    df = df.copy()
 
-        # Garantir que a coluna existe e é numérica
+    # 2) Converte todas as colunas de parâmetros de uma só vez
+    df.loc[:, parametros] = df.loc[:, parametros].apply(pd.to_numeric, errors="coerce")
+
+    figs = []
+    for parametro in parametros:
         if parametro not in df.columns:
             raise ValueError(f"Parâmetro '{parametro}' não encontrado no DataFrame.")
-        df[parametro] = pd.to_numeric(df[parametro], errors="coerce")
 
-        # Agrupar e pivotar
-        df_grouped = df.groupby(["Ponto", "Profundidade"])[parametro].mean().unstack()
+        # Agrupa e pivot
+        df_grouped = (
+            df.groupby(["Ponto", "Profundidade"])[parametro]
+              .mean()
+              .unstack(fill_value=np.nan)
+        )
         pontos = df_grouped.index
         x = np.arange(len(pontos))
         width = 0.2
 
-        # Obter valores para profundidades
-        superficie = df_grouped.get(
-            "Superfície", pd.Series([np.nan] * len(pontos), index=pontos)
-        ).values
-        meio = df_grouped.get(
-            "Meio", pd.Series([np.nan] * len(pontos), index=pontos)
-        ).values
-        fundo = df_grouped.get(
-            "Fundo", pd.Series([np.nan] * len(pontos), index=pontos)
-        ).values
+        superficie = df_grouped.get("Superfície", pd.Series(np.nan, index=pontos)).values
+        meio      = df_grouped.get("Meio",      pd.Series(np.nan, index=pontos)).values
+        fundo     = df_grouped.get("Fundo",     pd.Series(np.nan, index=pontos)).values
 
-        # Média total e média por ponto
-        media_total = np.full(
-            len(pontos), np.nanmean(np.concatenate([superficie, meio, fundo]))
-        )
+        media_total = np.full(len(pontos), np.nanmean(np.concatenate([superficie, meio, fundo])))
         media_ponto = np.nanmean([superficie, meio, fundo], axis=0)
 
-        # Valor do VMP
         vmp_valor = vmp_qag.get(classe, {}).get(parametro, None)
-        if isinstance(vmp_valor, str) or vmp_valor is None:
+        if vmp_valor is None or isinstance(vmp_valor, str):
             conama_limite = np.full(len(pontos), np.nan)
-            limite_str = f"(sem limite numérico)"
+            limite_str = "(sem limite numérico)"
         else:
-            # cria linha constante no valor do limite
             conama_limite = np.full(len(pontos), float(vmp_valor))
             limite_str = f"(Limite CONAMA: {vmp_valor})"
 
         # Plot
-        fig, ax = plt.subplots(figsize=(12, 6))
-        ax.bar(x - width, superficie, width, label="Superfície", color="#0072B2")
-        ax.bar(x, meio, width, label="Meio", color="#E69F00")
-        ax.bar(x + width, fundo, width, label="Fundo", color="#009E73")
+        fig, ax = plt.subplots(figsize=(12, 6), dpi=120)
+        ax.bar(x - width, superficie, width, label="Superfície")
+        ax.bar(x, meio,      width, label="Meio")
+        ax.bar(x + width, fundo, width, label="Fundo")
 
-        ax.plot(
-            x,
-            media_total,
-            label="Média total",
-            color="#56B4E9",
-            linewidth=2,
-        )
-        ax.plot(
-            x,
-            media_ponto,
-            label="Média ponto",
-            color="olive",
-            linestyle="--",
-            linewidth=2,
-        )
-        ax.plot(
-            x,
-            conama_limite,
-            label="CONAMA",
-            color="red",
-            linestyle="--",
-            linewidth=3,
-        )
+        ax.plot(x, media_total, label="Média total",   linewidth=2)
+        ax.plot(x, media_ponto, label="Média ponto", linestyle="--", linewidth=2)
+        ax.plot(x, conama_limite, label="CONAMA",   linestyle="--", linewidth=3)
 
         ax.set_xticks(x)
         ax.set_xticklabels(pontos, rotation=45)
         ax.set_ylabel("Concentração (mg/L)")
-        ax.set_title(f"{parametro} - {classe} {limite_str}")
+        ax.set_title(f"{parametro} — Classe {classe} {limite_str}")
         ax.legend()
-        ax.grid(True, axis="y", linestyle="--", alpha=0.7)
+        ax.grid(axis="y", linestyle="--", alpha=0.7)
+        plt.tight_layout()
 
         figs.append(fig)
 
