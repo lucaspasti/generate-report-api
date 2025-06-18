@@ -1,10 +1,10 @@
-from fastapi import FastAPI  # type: ignore
+from fastapi import FastAPI, Response  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from app.config import settings
-from app.routers import qag
-from app.routers import qsd
-from app.routers import qags
+from app.routers import qag, qsd, qags
 
 app = FastAPI(
     title="API EC-Infra",
@@ -24,10 +24,22 @@ app.add_middleware(
 # Routers
 app.include_router(qag.router, prefix="/reports/qag", tags=["QAG"])
 app.include_router(qsd.router, prefix="/reports/qsd", tags=["QSD"])
-# app.include_router(qar.router, prefix="/reports/qar", tags=["QAR"])
 app.include_router(qags.router, prefix="/reports/qags", tags=["QAGS"])
+
+# Serve arquivos estáticos (como favicon.ico)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("static/favicon.ico")
 
 
 @app.get("/", tags=["Health"])
 def health_check():
     return {"status": "ok", "message": "API EC-Infra is up and running"}
+
+
+@app.head("/", include_in_schema=False)
+async def head_root():
+    return Response(status_code=200)
