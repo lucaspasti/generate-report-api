@@ -108,24 +108,26 @@ class AbstractService(ABC):
             data,
             {"contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
         )
-        public_url = self.supabase.storage.from_(
+        url_res = self.supabase.storage.from_(
             self.BUCKET).get_public_url(self.object_key)
+        public_url = url_res.get("publicUrl") or url_res.get(
+            "data", {}).get("publicUrl")
 
-        try:
-            self.supabase.table("relatorios").insert(
-                {
-                    "nome_relatorio": self.payload.nome_relatorio,
-                    "descricao_relatorio": self.payload.descricao_relatorio,
-                    "ativo_id": str(self.payload.ativo_id),
-                    "user_id": str(self.payload.user_id),
-                    "tipo_relatorio": self.tipo_relatorio,
-                    "url_relatorio": public_url,
-                }
-            ).execute()
-        except Exception as e:
-            return self.Request(sucesso=False, mensagem=f"Erro ao registrar o relatório: {e}")
+        # insere no banco
+        self.supabase.table("relatorios").insert({
+            "nome_relatorio":    self.payload.nome_relatorio,
+            "descricao_relatorio": self.payload.descricao_relatorio,
+            "ativo_id":          str(self.payload.ativo_id),
+            "user_id":           str(self.payload.user_id),
+            "tipo_relatorio":    self.tipo_relatorio,
+            "url_relatorio":     public_url,
+        }).execute()
 
-        return self.Response(sucesso=True, mensagem="Relatório gerado e registrado com sucesso.")
+        return self.Response(
+            sucesso=True,
+            mensagem="Relatório gerado e registrado com sucesso.",
+            url_relatorio=public_url
+        )
 
     def _new_subdoc(self) -> Subdoc:
         """Cria um Subdoc para injeção no contexto."""

@@ -1,7 +1,8 @@
 # app/schemas/qag.py
 from uuid import UUID
 from datetime import date
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, HttpUrl, Field
+
 
 
 class QAGRequest(BaseModel):
@@ -30,3 +31,4 @@ class QAGRequest(BaseModel):
 class QAGResponse(BaseModel):
     mensagem: str
     sucesso: bool
+    url_relatorio: HttpUrl
