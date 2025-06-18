@@ -10,7 +10,6 @@ from pytz import timezone
 from supabase import Client
 from docxtpl import InlineImage, RichText
 from docx.shared import Cm
-
 from app.schemas.qag import QAGRequest, QAGResponse
 from app.utils.date_utils import mes_por_extenso
 from app.utils.graficos import grafico_qualidade_agua

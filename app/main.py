@@ -35,3 +35,11 @@ def health_check():
 @app.head("/", include_in_schema=False)
 async def head_root():
     return Response(status_code=200)
+
+@app.get("/_env")
+def dump_env():
+    return {
+        "SUPABASE_URL": settings.SUPABASE_URL,
+        "SUPABASE_KEY_set?": bool(settings.SUPABASE_KEY),
+        "ALLOWED_ORIGINS": settings.ALLOWED_ORIGINS,
+    }
