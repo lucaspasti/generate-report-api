@@ -22,9 +22,9 @@ app.add_middleware(
 )
 
 # Routers
-app.include_router(qag.router, prefix="/reports/qag/", tags=["QAG"])
-app.include_router(qsd.router, prefix="/reports/qsd/", tags=["QSD"])
-app.include_router(qags.router, prefix="/reports/qags/", tags=["QAGS"])
+app.include_router(qag.router, prefix="/reports/qag", tags=["QAG"])
+app.include_router(qsd.router, prefix="/reports/qsd", tags=["QSD"])
+app.include_router(qags.router, prefix="/reports/qags", tags=["QAGS"])
 
 
 @app.get("/", tags=["Health"])
