@@ -11,6 +11,20 @@ class QAGRequest(BaseModel):
     nome_relatorio: str = Field("Relatório de Qualidade da Água Superficial")
     descricao_relatorio: str
     periodicidade: str
+    parametros: list[str] = Field(
+        default=[
+            "Materiais flutuantes",
+            "Óleos e graxas",
+            "Substâncias que comuniquem gosto ou odor",
+            "Corantes provenientes de fontes antrópicas",
+            "Resíduos sólidos objetáveis",
+            "Turbidez (UNT)",
+            "Cor verdadeira (mg Pt/L)",
+            "Sólidos dissolvidos totais (mg/L)",
+            "pH (N/A)",
+        ],
+        description="Lista de parâmetros a serem incluídos no relatório.",
+    )
 
 
 class QAGResponse(BaseModel):
