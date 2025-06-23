@@ -100,21 +100,31 @@ class AbstractService(ABC):
 
     def upload_and_register_report(self):
         """Faz upload do DOCX para o Storage e registra no Supabase."""
+        # 1) Leitura do arquivo
         with open(self.server_path, "rb") as f:
             data = f.read()
 
+        # 2) Upload no bucket
         self.supabase.storage.from_(self.BUCKET).upload(
             self.object_key,
             data,
             {"contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
         )
+
+        # 3) Pega a URL pública
         url_res = self.supabase.storage.from_(
             self.BUCKET).get_public_url(self.object_key)
-        public_url = url_res.get("publicUrl") or url_res.get(
-            "data", {}).get("publicUrl")
 
-        # insere no banco
-        self.supabase.table("relatorios").insert({
+        # Se veio string, use direto; se veio dict, extraia o campo
+        if isinstance(url_res, str):
+            public_url = url_res
+        else:
+            # bibliotecas diferentes podem devolver {'publicUrl':...} ou {'data':{'publicUrl':...}}
+            public_url = url_res.get("publicUrl") or url_res.get(
+                "data", {}).get("publicUrl")
+
+        # 4) Grava no Supabase DB
+        insert_res = self.supabase.table("relatorios").insert({
             "nome_relatorio":    self.payload.nome_relatorio,
             "descricao_relatorio": self.payload.descricao_relatorio,
             "ativo_id":          str(self.payload.ativo_id),
@@ -123,6 +133,12 @@ class AbstractService(ABC):
             "url_relatorio":     public_url,
         }).execute()
 
+        # 5) Você pode checar insert_res.error para garantir que deu certo
+        if insert_res.error:
+            raise RuntimeError(
+                f"Erro ao inserir relatório: {insert_res.error.message}")
+
+        # 6) Resposta
         return self.Response(
             sucesso=True,
             mensagem="Relatório gerado e registrado com sucesso.",
