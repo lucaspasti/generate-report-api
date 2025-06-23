@@ -29,3 +29,16 @@ app.include_router(qags.router, prefix="/reports/qags", tags=["QAGS"])
 @app.get("/", tags=["Health"])
 def health_check():
     return {"status": "ok", "message": "API EC-Infra is up and running"}
+
+
+@app.get("/", tags=["_env"])
+def env_check():
+    return {
+        "status": "ok",
+        "message": "API EC-Infra is up and running",
+        "env": {
+            "SUPABASE_URL": settings.SUPABASE_URL,
+            "SUPABASE_KEY": 'OK',
+            "ALLOWED_ORIGINS": settings.ALLOWED_ORIGINS,
+        },
+    }
