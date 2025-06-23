@@ -14,7 +14,7 @@ app = FastAPI(
 # 1) CORSMiddleware deve vir imediatamente depois de criar o app…
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://ec-infra.vercel.app/"],
+    allow_origins=["http://localhost:3000", "https://ec-infra.vercel.app"],
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
     allow_credentials=True,
