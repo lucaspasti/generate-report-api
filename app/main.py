@@ -31,7 +31,7 @@ def health_check():
     return {"status": "ok", "message": "API EC-Infra is up and running"}
 
 
-@app.get("/", tags=["_env"])
+@app.get("/_env")
 def env_check():
     return {
         "status": "ok",
