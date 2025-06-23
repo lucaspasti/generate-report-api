@@ -17,7 +17,7 @@ app.add_middleware(
     allow_origins=settings.ALLOWED_ORIGINS,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
-    allow_credentials=False,
+    allow_credentials=True,
 )
 
 # 2) Só depois disso você monta arquivos estáticos ou routers
