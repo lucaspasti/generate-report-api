@@ -50,11 +50,14 @@ def gera_distribuicao_granulometrica_qsd(dados):
         weight="bold",
         pad=15
     )
-    ax.legend(loc="upper left", bbox_to_anchor=(1, 1), fontsize=10, frameon=True)
+    ax.legend(loc="upper left", bbox_to_anchor=(
+        1, 1), fontsize=10, frameon=True)
     ax.grid(axis="y", linestyle=":", alpha=0.5)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     plt.tight_layout()
+    plt.close(fig)
+
     return fig
 
 
@@ -71,7 +74,8 @@ def graficos_linha_com_vmp_por_classe_qsd(
             continue
 
         fig, ax = plt.subplots(figsize=(8, 5), dpi=120)
-        ax.plot(dados[eixo_x].values, dados[col].values, marker="o", label="Amostras")
+        ax.plot(dados[eixo_x].values, dados[col].values,
+                marker="o", label="Amostras")
 
         # Linha da média dos pontos
         media = dados[col].mean()
@@ -88,7 +92,8 @@ def graficos_linha_com_vmp_por_classe_qsd(
             classe = row[classe_col]
             vmp = vmp_dict.get(classe, {}).get(col, None)
             if vmp is not None:
-                ax.axhline(y=vmp, color="red", linestyle="--", linewidth=1.0, alpha=0.5)
+                ax.axhline(y=vmp, color="red", linestyle="--",
+                           linewidth=1.0, alpha=0.5)
 
         # Legenda do VMP
         classes_usadas = dados[classe_col].unique()
@@ -114,6 +119,7 @@ def graficos_linha_com_vmp_por_classe_qsd(
         fig.tight_layout()
 
         figuras.append(fig)
+        plt.close(fig)
 
     return figuras
 
@@ -126,12 +132,14 @@ def grafico_qualidade_agua(df, parametros, classe, vmp_qag):
     df = df.copy()
 
     # 2) Converte todas as colunas de parâmetros de uma só vez
-    df.loc[:, parametros] = df.loc[:, parametros].apply(pd.to_numeric, errors="coerce")
+    df.loc[:, parametros] = df.loc[:, parametros].apply(
+        pd.to_numeric, errors="coerce")
 
     figs = []
     for parametro in parametros:
         if parametro not in df.columns:
-            raise ValueError(f"Parâmetro '{parametro}' não encontrado no DataFrame.")
+            raise ValueError(
+                f"Parâmetro '{parametro}' não encontrado no DataFrame.")
 
         # Agrupa e pivot
         df_grouped = (
@@ -143,11 +151,15 @@ def grafico_qualidade_agua(df, parametros, classe, vmp_qag):
         x = np.arange(len(pontos))
         width = 0.2
 
-        superficie = df_grouped.get("Superfície", pd.Series(np.nan, index=pontos)).values
-        meio      = df_grouped.get("Meio",      pd.Series(np.nan, index=pontos)).values
-        fundo     = df_grouped.get("Fundo",     pd.Series(np.nan, index=pontos)).values
+        superficie = df_grouped.get(
+            "Superfície", pd.Series(np.nan, index=pontos)).values
+        meio = df_grouped.get("Meio",      pd.Series(
+            np.nan, index=pontos)).values
+        fundo = df_grouped.get(
+            "Fundo",     pd.Series(np.nan, index=pontos)).values
 
-        media_total = np.full(len(pontos), np.nanmean(np.concatenate([superficie, meio, fundo])))
+        media_total = np.full(len(pontos), np.nanmean(
+            np.concatenate([superficie, meio, fundo])))
         media_ponto = np.nanmean([superficie, meio, fundo], axis=0)
 
         vmp_valor = vmp_qag.get(classe, {}).get(parametro, None)
@@ -165,8 +177,10 @@ def grafico_qualidade_agua(df, parametros, classe, vmp_qag):
         ax.bar(x + width, fundo, width, label="Fundo")
 
         ax.plot(x, media_total, label="Média total",   linewidth=2)
-        ax.plot(x, media_ponto, label="Média ponto", linestyle="--", linewidth=2)
-        ax.plot(x, conama_limite, label="CONAMA",   linestyle="--", linewidth=3)
+        ax.plot(x, media_ponto, label="Média ponto",
+                linestyle="--", linewidth=2)
+        ax.plot(x, conama_limite, label="CONAMA",
+                linestyle="--", linewidth=3)
 
         ax.set_xticks(x)
         ax.set_xticklabels(pontos, rotation=45)
@@ -177,5 +191,6 @@ def grafico_qualidade_agua(df, parametros, classe, vmp_qag):
         plt.tight_layout()
 
         figs.append(fig)
+        plt.close(fig)
 
     return figs
