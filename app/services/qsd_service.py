@@ -339,9 +339,12 @@ class QSDService(AbstractService):
         dados_grafico = [
             "Carbono Orgânico Total (%)", "Nitrogênio Kjeldahl Total (mg/kg)", "Fósforo Total (mg/kg)"
         ]
-        graficos_qsd51 = graficos_linha_com_vmp_por_classe_qsd(
-            self.df_resultados, dados_grafico, vmp_qsd
-        )
+        try:
+            graficos_qsd51 = graficos_linha_com_vmp_por_classe_qsd(
+                self.df_resultados, dados_grafico, vmp_qsd
+            )
+        except:
+            pass
         imagens_qsd51 = self._figs_to_inline_images(graficos_qsd51)
 
         # Preencher contexto
