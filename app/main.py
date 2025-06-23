@@ -21,7 +21,7 @@ app.add_middleware(
 )
 
 # 2) Só depois disso você monta arquivos estáticos ou routers
-app.include_router(qag.router, prefix="/reports/qag/", tags=["QAG"])
+app.include_router(qag.router, prefix="/reports/qag", tags=["QAG"])
 app.include_router(qsd.router, prefix="/reports/qsd", tags=["QSD"])
 app.include_router(qags.router, prefix="/reports/qags", tags=["QAGS"])
 
