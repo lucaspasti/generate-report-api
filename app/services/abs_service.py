@@ -122,21 +122,22 @@ class AbstractService(ABC):
             # bibliotecas diferentes podem devolver {'publicUrl':...} ou {'data':{'publicUrl':...}}
             public_url = url_res.get("publicUrl") or url_res.get(
                 "data", {}).get("publicUrl")
+            
+        try:
+            self.supabase.table("relatorios").insert({
+                "nome_relatorio":    self.payload.nome_relatorio,
+                "descricao_relatorio": self.payload.descricao_relatorio,
+                "ativo_id":          str(self.payload.ativo_id),
+                "user_id":           str(self.payload.user_id),
+                "tipo_relatorio":    self.tipo_relatorio,
+                "url_relatorio":     public_url,
+            }).execute()
 
-        # 4) Grava no Supabase DB
-        insert_res = self.supabase.table("relatorios").insert({
-            "nome_relatorio":    self.payload.nome_relatorio,
-            "descricao_relatorio": self.payload.descricao_relatorio,
-            "ativo_id":          str(self.payload.ativo_id),
-            "user_id":           str(self.payload.user_id),
-            "tipo_relatorio":    self.tipo_relatorio,
-            "url_relatorio":     public_url,
-        }).execute()
-
-        # 5) Você pode checar insert_res.error para garantir que deu certo
-        if insert_res.error:
-            raise RuntimeError(
-                f"Erro ao inserir relatório: {insert_res.error.message}")
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Erro ao registrar relatório: {str(e)}"
+            )
 
         # 6) Resposta
         return self.Response(
