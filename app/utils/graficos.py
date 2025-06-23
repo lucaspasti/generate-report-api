@@ -136,61 +136,65 @@ def grafico_qualidade_agua(df, parametros, classe, vmp_qag):
         pd.to_numeric, errors="coerce")
 
     figs = []
-    for parametro in parametros:
-        if parametro not in df.columns:
-            raise ValueError(
-                f"Parâmetro '{parametro}' não encontrado no DataFrame.")
+    try:
+        for parametro in parametros:
+            if parametro not in df.columns:
+                raise ValueError(
+                    f"Parâmetro '{parametro}' não encontrado no DataFrame.")
 
-        # Agrupa e pivot
-        df_grouped = (
-            df.groupby(["Ponto", "Profundidade"])[parametro]
-              .mean()
-              .unstack(fill_value=np.nan)
-        )
-        pontos = df_grouped.index
-        x = np.arange(len(pontos))
-        width = 0.2
+            # Agrupa e pivot
+            df_grouped = (
+                df.groupby(["Ponto", "Profundidade"])[parametro]
+                .mean()
+                .unstack(fill_value=np.nan)
+            )
+            pontos = df_grouped.index
+            x = np.arange(len(pontos))
+            width = 0.2
 
-        superficie = df_grouped.get(
-            "Superfície", pd.Series(np.nan, index=pontos)).values
-        meio = df_grouped.get("Meio",      pd.Series(
-            np.nan, index=pontos)).values
-        fundo = df_grouped.get(
-            "Fundo",     pd.Series(np.nan, index=pontos)).values
-        media_total = np.full(len(pontos), np.nanmean(
-            np.concatenate([superficie, meio, fundo])))
+            superficie = df_grouped.get(
+                "Superfície", pd.Series(np.nan, index=pontos)).values
+            meio = df_grouped.get("Meio",      pd.Series(
+                np.nan, index=pontos)).values
+            fundo = df_grouped.get(
+                "Fundo",     pd.Series(np.nan, index=pontos)).values
+            media_total = np.full(len(pontos), np.nanmean(
+                np.concatenate([superficie, meio, fundo])))
 
-        media_ponto = np.nanmean([superficie, meio, fundo], axis=0)
+            media_ponto = np.nanmean([superficie, meio, fundo], axis=0)
 
-        vmp_valor = vmp_qag.get(classe, {}).get(parametro, None)
-        if vmp_valor is None or isinstance(vmp_valor, str):
-            conama_limite = np.full(len(pontos), np.nan)
-            limite_str = "(sem limite numérico)"
-        else:
-            conama_limite = np.full(len(pontos), float(vmp_valor))
-            limite_str = f"(Limite CONAMA: {vmp_valor})"
+            vmp_valor = vmp_qag.get(classe, {}).get(parametro, None)
+            if vmp_valor is None or isinstance(vmp_valor, str):
+                conama_limite = np.full(len(pontos), np.nan)
+                limite_str = "(sem limite numérico)"
+            else:
+                conama_limite = np.full(len(pontos), float(vmp_valor))
+                limite_str = f"(Limite CONAMA: {vmp_valor})"
 
-        # Plot
-        fig, ax = plt.subplots(figsize=(12, 6), dpi=120)
-        ax.bar(x - width, superficie, width, label="Superfície")
-        ax.bar(x, meio,      width, label="Meio")
-        ax.bar(x + width, fundo, width, label="Fundo")
+            # Plot
+            fig, ax = plt.subplots(figsize=(12, 6), dpi=120)
+            ax.bar(x - width, superficie, width, label="Superfície")
+            ax.bar(x, meio,      width, label="Meio")
+            ax.bar(x + width, fundo, width, label="Fundo")
 
-        ax.plot(x, media_total, label="Média total",   linewidth=2)
-        ax.plot(x, media_ponto, label="Média ponto",
-                linestyle="--", linewidth=2)
-        ax.plot(x, conama_limite, label="CONAMA",
-                linestyle="--", linewidth=3)
+            ax.plot(x, media_total, label="Média total",   linewidth=2)
+            ax.plot(x, media_ponto, label="Média ponto",
+                    linestyle="--", linewidth=2)
+            ax.plot(x, conama_limite, label="CONAMA",
+                    linestyle="--", linewidth=3)
 
-        ax.set_xticks(x)
-        ax.set_xticklabels(pontos, rotation=45)
-        ax.set_ylabel("Concentração (mg/L)")
-        ax.set_title(f"{parametro} — Classe {classe} {limite_str}")
-        ax.legend()
-        ax.grid(axis="y", linestyle="--", alpha=0.7)
-        plt.tight_layout()
+            ax.set_xticks(x)
+            ax.set_xticklabels(pontos, rotation=45)
+            ax.set_ylabel("Concentração (mg/L)")
+            ax.set_title(f"{parametro} — Classe {classe} {limite_str}")
+            ax.legend()
+            ax.grid(axis="y", linestyle="--", alpha=0.7)
+            plt.tight_layout()
 
-        figs.append(fig)
-        plt.close(fig)
+            figs.append(fig)
+            plt.close(fig)
+    except Exception as e:
+        print(f"Erro ao gerar gráfico para {classe} - {parametro}: {e}")
+        return []
 
     return figs
