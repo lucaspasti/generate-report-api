@@ -8,7 +8,7 @@ from app.dependencies import get_supabase
 router = APIRouter()
 
 
-@router.post("", response_model=QAGResponse)
+@router.post("/", response_model=QAGResponse)
 def criar_qag(
     payload: QAGRequest,
     supabase=Depends(get_supabase),
