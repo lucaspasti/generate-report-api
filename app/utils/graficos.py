@@ -157,9 +157,12 @@ def grafico_qualidade_agua(df, parametros, classe, vmp_qag):
             np.nan, index=pontos)).values
         fundo = df_grouped.get(
             "Fundo",     pd.Series(np.nan, index=pontos)).values
-
-        media_total = np.full(len(pontos), np.nanmean(
-            np.concatenate([superficie, meio, fundo])))
+        try:
+            media_total = np.full(len(pontos), np.nanmean(
+                np.concatenate([superficie, meio, fundo])))
+        except:
+            continue
+            
         media_ponto = np.nanmean([superficie, meio, fundo], axis=0)
 
         vmp_valor = vmp_qag.get(classe, {}).get(parametro, None)
