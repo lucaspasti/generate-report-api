@@ -8,8 +8,7 @@ from typing import List
 class Settings(BaseSettings):
     SUPABASE_URL: str
     SUPABASE_KEY: str
-    ALLOWED_ORIGINS = json.loads(
-        os.getenv("ALLOWED_ORIGINS", '["http://localhost:3000"]'))
+    ALLOWED_ORIGINS: List[str] = ['http://localhost:3000']
 
     class Config:
         env_file = ".env"
