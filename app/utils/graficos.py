@@ -193,8 +193,9 @@ def grafico_qualidade_agua(df, parametros, classe, vmp_qag):
 
             figs.append(fig)
             plt.close(fig)
+
     except Exception as e:
         print(f"Erro ao gerar gráfico para {classe} - {parametro}: {e}")
-        return []
+        pass
 
     return figs
