@@ -1,20 +1,21 @@
 # abs_service.py
 
-import os
-import io
-import tempfile
-from abc import ABC
-from datetime import datetime
-from pytz import timezone
-from collections import OrderedDict
-
-import numpy as np
-import pandas as pd
-from supabase import Client
-from fastapi import HTTPException
-from docxtpl import DocxTemplate, Subdoc, InlineImage
-from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.shared import Cm
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docxtpl import DocxTemplate, Subdoc, InlineImage
+from fastapi import HTTPException
+from supabase import Client
+import pandas as pd
+import numpy as np
+from collections import OrderedDict
+from pytz import timezone
+from datetime import datetime
+from abc import ABC
+import tempfile
+import io
+import os
+import matplotlib
+matplotlib.use("Agg")  # evita Tkinter
 
 
 class AbstractService(ABC):
@@ -35,7 +36,7 @@ class AbstractService(ABC):
         self.BUCKET = BUCKET
         self.tipo_relatorio = tipo_relatorio
         self.periodicidade = payload.periodicidade
-        self.data_str = payload.data_campanha.isoformat()
+        self.data_str = payload.data_campanha[0].isoformat()
         self.tz_br = timezone("America/Sao_Paulo")
         self.now_br = datetime.now(self.tz_br)
         self.object_key = f"{payload.ativo_id}/{self.data_str}/{self.now_br:%Y-%m-%d_%H-%M-%S}.docx"
@@ -44,10 +45,12 @@ class AbstractService(ABC):
             self.tmp_dir, os.path.basename(self.object_key))
 
         self.document = DocxTemplate(self.TEMPLATE_PATH)
-        self.ativo, self.configuracoes, self.form = self._get_data(
+        self.ativo, self.configuracoes, self.license, self.form = self._get_data(
             nome_formulario)
-        resultados = self.form.data[0]["resultados"]
-        self.df_resultados = pd.DataFrame(resultados).fillna("Indisponível")
+
+        resultados_raw = self.form.data[0].get("resultados")
+        self.df_resultados = self._parse_resultados(
+            resultados_raw).fillna("Indisponível")
 
         # parâmetros específicos (podem vir do payload)
         self.parametros = getattr(payload, "parametros", [])
@@ -60,9 +63,27 @@ class AbstractService(ABC):
         self.Response = Response
         self.Request = Request
 
+    def _parse_resultados(self, rec) -> pd.DataFrame:
+        import json
+        if isinstance(rec, str):
+            rec = json.loads(rec)
+        elif isinstance(rec, dict):
+            rec = [rec]
+        elif rec is None:
+            rec = []
+        elif not isinstance(rec, list):
+            raise ValueError(f"Formato inesperado: {type(rec)}")
+
+        df = pd.DataFrame(rec).replace("Virtualmente ausentes", np.nan)
+        categoricas = {"Data", "Ponto", "Classe", "Tipo de análise"}
+        for col in df.columns:
+            if col not in categoricas:
+                df[col] = pd.to_numeric(df[col], errors="ignore")
+        return df
+
     def _get_data(self, nome_formulario: str):
         ativo = (
-            self.supabase.table("ativos")
+            self.supabase.table("port_terminals")
             .select("*")
             .eq("id", str(self.payload.ativo_id))
             .execute()
@@ -71,15 +92,24 @@ class AbstractService(ABC):
             raise HTTPException(404, detail="Ativo não encontrado")
 
         configuracoes = (
-            self.supabase.table("configuracao_formulario_ativos")
+            self.supabase.table("config_qag")
             .select("*")
-            .eq("ativo_id", str(self.payload.ativo_id))
-            .eq("tipo_formulario", nome_formulario)
+            .eq("asset_id", str(self.payload.ativo_id))
+            .eq("program_category", self.tipo_relatorio)
             .execute()
         )
         if not configuracoes.data:
             raise HTTPException(
                 404, detail="Configuração do formulário não encontrada")
+        license = (
+            self.supabase.table("licenses")
+            .select("*")
+            .eq("asset_id", str(self.payload.ativo_id))
+            .execute()
+        )
+        if not license.data:
+            raise HTTPException(
+                404, detail="Licença não encontrada")
 
         form = (
             self.supabase.table(nome_formulario)
@@ -91,7 +121,7 @@ class AbstractService(ABC):
         if not form.data:
             raise HTTPException(404, detail="Campanha não encontrada")
 
-        return ativo, configuracoes, form
+        return ativo, configuracoes, license, form
 
     def render_document(self):
         """Renderiza e salva o documento no caminho temporário."""
@@ -122,11 +152,10 @@ class AbstractService(ABC):
             # bibliotecas diferentes podem devolver {'publicUrl':...} ou {'data':{'publicUrl':...}}
             public_url = url_res.get("publicUrl") or url_res.get(
                 "data", {}).get("publicUrl")
-            
+
         try:
-            self.supabase.table("relatorios").insert({
-                "nome_relatorio":    self.payload.nome_relatorio,
-                "descricao_relatorio": self.payload.descricao_relatorio,
+            self.supabase.table("reports").insert({
+                "nome_relatorio":    self.payload.nome_relatorio + " - " + self.data_str,
                 "ativo_id":          str(self.payload.ativo_id),
                 "user_id":           str(self.payload.user_id),
                 "tipo_relatorio":    self.tipo_relatorio,
@@ -274,14 +303,17 @@ class AbstractService(ABC):
             self.contexto[ctx_key] = subdoc
         return subdoc
 
+
     def _figs_to_inline_images(self, figs, width=Cm(12), height=Cm(6)):
+        import matplotlib.pyplot as plt  # ok aqui, backend já é Agg
         images = []
         for fig in figs:
             buf = io.BytesIO()
             fig.savefig(buf, format="PNG", dpi=120, bbox_inches="tight")
             buf.seek(0)
             images.append(InlineImage(self.document, buf,
-                          width=width, height=height))
+                        width=width, height=height))
+            plt.close(fig)  # <- importante
         return images
 
     def _percentual_conformidade(self, df, parametros, vmp_dict):

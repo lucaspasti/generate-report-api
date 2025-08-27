@@ -4,13 +4,12 @@ from datetime import date
 from pydantic import BaseModel, HttpUrl, Field
 
 
-
 class QAGRequest(BaseModel):
     ativo_id: UUID
-    data_campanha: date
+    data_campanha: list[date]
     user_id: UUID
-    nome_relatorio: str = Field("Relatório de Qualidade da Água Superficial")
-    descricao_relatorio: str
+    nome_relatorio: str = Field(
+        f"Relatório de Qualidade da Água Superficial")
     periodicidade: str
     parametros: list[str] = Field(
         default=[
